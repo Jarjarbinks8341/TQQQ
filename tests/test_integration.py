@@ -124,7 +124,7 @@ class TestSignalDetectionIntegration:
             assert "signal_type" in signal
             assert "close_price" in signal
             assert "ma5" in signal
-            assert "ma20" in signal
+            assert "ma30" in signal
 
             # Validate signal type
             assert signal["signal_type"] in ["GOLDEN_CROSS", "DEAD_CROSS"]
@@ -143,11 +143,11 @@ class TestSignalDetectionIntegration:
         for signal in signals:
             assert signal["close_price"] > 0
             assert signal["ma5"] > 0
-            assert signal["ma20"] > 0
+            assert signal["ma30"] > 0
             assert signal["close_price"] < 500  # Sanity check
 
-    def test_golden_cross_ma5_above_ma20(self):
-        """Verify golden cross signals have MA5 > MA20."""
+    def test_golden_cross_ma5_above_ma30(self):
+        """Verify golden cross signals have MA5 > MA30."""
         conn = get_connection()
         signals = detect_crossovers(conn)
         conn.close()
@@ -155,11 +155,11 @@ class TestSignalDetectionIntegration:
         golden_crosses = [s for s in signals if s["signal_type"] == "GOLDEN_CROSS"]
 
         for signal in golden_crosses:
-            assert signal["ma5"] > signal["ma20"], \
-                f"Golden cross on {signal['date']} has MA5 <= MA20"
+            assert signal["ma5"] > signal["ma30"], \
+                f"Golden cross on {signal['date']} has MA5 <= MA30"
 
-    def test_dead_cross_ma5_below_ma20(self):
-        """Verify dead cross signals have MA5 < MA20."""
+    def test_dead_cross_ma5_below_ma30(self):
+        """Verify dead cross signals have MA5 < MA30."""
         conn = get_connection()
         signals = detect_crossovers(conn)
         conn.close()
@@ -167,8 +167,8 @@ class TestSignalDetectionIntegration:
         dead_crosses = [s for s in signals if s["signal_type"] == "DEAD_CROSS"]
 
         for signal in dead_crosses:
-            assert signal["ma5"] < signal["ma20"], \
-                f"Dead cross on {signal['date']} has MA5 >= MA20"
+            assert signal["ma5"] < signal["ma30"], \
+                f"Dead cross on {signal['date']} has MA5 >= MA30"
 
     def test_signals_alternate_between_types(self):
         """Verify signals generally alternate (can't have two golden in a row)."""
@@ -350,8 +350,8 @@ class TestEndToEndIntegration:
         # Filter to January 2026
         jan_signals = [s for s in signals if s["date"].startswith("2026-01")]
 
-        # Based on our earlier simulation, we expect these signals:
-        expected_dates = ["2026-01-02", "2026-01-08", "2026-01-20"]
+        # Based on MA5/MA30 crossover simulation, we expect these signals:
+        expected_dates = ["2026-01-06", "2026-01-09", "2026-01-20"]
 
         actual_dates = sorted([s["date"] for s in jan_signals])
 
@@ -369,10 +369,10 @@ class TestEndToEndIntegration:
         jan_signals = {s["date"]: s["signal_type"] for s in signals
                       if s["date"].startswith("2026-01")}
 
-        # Expected signal types based on our simulation
+        # Expected signal types based on MA5/MA30 simulation
         expected = {
-            "2026-01-02": "DEAD_CROSS",
-            "2026-01-08": "GOLDEN_CROSS",
+            "2026-01-06": "DEAD_CROSS",
+            "2026-01-09": "GOLDEN_CROSS",
             "2026-01-20": "DEAD_CROSS",
         }
 

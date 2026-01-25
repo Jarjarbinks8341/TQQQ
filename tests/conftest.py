@@ -43,7 +43,7 @@ def temp_db():
             signal_type TEXT NOT NULL,
             close_price REAL,
             ma5 REAL,
-            ma20 REAL,
+            ma30 REAL,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(date, signal_type)
         )
@@ -60,13 +60,13 @@ def temp_db():
 @pytest.fixture
 def sample_price_data():
     """Generate sample price data for testing."""
-    dates = pd.date_range(start="2025-01-01", periods=30, freq="B")
+    dates = pd.date_range(start="2025-01-01", periods=40, freq="B")
     data = {
-        "Open": [50 + i * 0.5 for i in range(30)],
-        "High": [51 + i * 0.5 for i in range(30)],
-        "Low": [49 + i * 0.5 for i in range(30)],
-        "Close": [50 + i * 0.5 for i in range(30)],
-        "Volume": [1000000 + i * 10000 for i in range(30)],
+        "Open": [50 + i * 0.5 for i in range(40)],
+        "High": [51 + i * 0.5 for i in range(40)],
+        "Low": [49 + i * 0.5 for i in range(40)],
+        "Close": [50 + i * 0.5 for i in range(40)],
+        "Volume": [1000000 + i * 10000 for i in range(40)],
     }
     df = pd.DataFrame(data, index=dates)
     return df
@@ -76,21 +76,23 @@ def sample_price_data():
 def sample_price_data_with_crossover():
     """Generate sample price data that creates a golden cross.
 
-    MA5 and MA20 need enough data to calculate, and we need a clear crossover.
-    With 30 days of data:
-    - MA20 needs 20 days, so crossover can happen on day 21+
-    - We create a decline for 25 days, then sharp rally to trigger golden cross
+    MA5 and MA30 need enough data to calculate, and we need a clear crossover.
+    With 40 days of data:
+    - MA30 needs 30 days, so crossover can happen on day 31+
+    - We create a decline for 35 days, then sharp rally to trigger golden cross
     """
-    dates = pd.date_range(start="2025-01-01", periods=30, freq="B")
+    dates = pd.date_range(start="2025-01-01", periods=40, freq="B")
 
-    # Decline for first 25 days, then rally
+    # Decline for first 35 days, then rally
     prices = (
-        [70, 68, 66, 64, 62]  # Days 1-5
-        + [60, 58, 56, 54, 52]  # Days 6-10
-        + [50, 48, 46, 44, 42]  # Days 11-15
-        + [40, 39, 38, 37, 36]  # Days 16-20: MA20 starts here
-        + [35, 34, 33, 32, 31]  # Days 21-25: continued decline
-        + [40, 50, 60, 70, 80]  # Days 26-30: sharp rally to cross
+        [80, 78, 76, 74, 72]  # Days 1-5
+        + [70, 68, 66, 64, 62]  # Days 6-10
+        + [60, 58, 56, 54, 52]  # Days 11-15
+        + [50, 48, 46, 44, 42]  # Days 16-20
+        + [40, 39, 38, 37, 36]  # Days 21-25
+        + [35, 34, 33, 32, 31]  # Days 26-30: MA30 starts here
+        + [30, 29, 28, 27, 26]  # Days 31-35: continued decline
+        + [40, 55, 70, 85, 100]  # Days 36-40: sharp rally to cross
     )
 
     data = {
@@ -98,7 +100,7 @@ def sample_price_data_with_crossover():
         "High": [float(p + 1) for p in prices],
         "Low": [float(p - 1) for p in prices],
         "Close": [float(p) for p in prices],
-        "Volume": [1000000] * 30,
+        "Volume": [1000000] * 40,
     }
     df = pd.DataFrame(data, index=dates)
     return df
@@ -139,7 +141,7 @@ def sample_signal():
         "signal_type": "GOLDEN_CROSS",
         "close_price": 55.50,
         "ma5": 54.00,
-        "ma20": 53.50,
+        "ma30": 53.50,
     }
 
 
@@ -151,5 +153,5 @@ def sample_dead_cross_signal():
         "signal_type": "DEAD_CROSS",
         "close_price": 48.00,
         "ma5": 49.00,
-        "ma20": 50.00,
+        "ma30": 50.00,
     }

@@ -61,8 +61,8 @@ class TestGetLastDate:
         conn, _ = populated_db
         result = get_last_date(conn)
         assert result is not None
-        # Should be the last business day in our 30-day sample
-        assert result == "2025-02-11"
+        # Should be the last business day in our 40-day sample
+        assert result == "2025-02-25"
 
 
 class TestSavePrices:
@@ -72,7 +72,7 @@ class TestSavePrices:
         """Test that prices are saved correctly."""
         conn, _ = temp_db
         rows = save_prices(conn, sample_price_data)
-        assert rows == 30
+        assert rows == 40
 
     def test_updates_existing_prices(self, temp_db, sample_price_data):
         """Test that existing prices are updated."""
@@ -86,7 +86,7 @@ class TestSavePrices:
         modified_data["Close"] = modified_data["Close"] + 10
         rows = save_prices(conn, modified_data)
 
-        assert rows == 30
+        assert rows == 40
 
         # Verify data was updated
         cursor = conn.cursor()
@@ -110,7 +110,7 @@ class TestLoadPrices:
         df = load_prices(conn)
 
         assert isinstance(df, pd.DataFrame)
-        assert len(df) == 30
+        assert len(df) == 40
         assert "date" in df.columns
         assert "close" in df.columns
 
@@ -205,7 +205,7 @@ class TestGetPriceCount:
         """Test returns correct count."""
         conn, _ = populated_db
         count = get_price_count(conn)
-        assert count == 30
+        assert count == 40
 
 
 class TestGetDateRange:
@@ -223,4 +223,4 @@ class TestGetDateRange:
         conn, _ = populated_db
         min_date, max_date = get_date_range(conn)
         assert min_date == "2025-01-01"
-        assert max_date == "2025-02-11"
+        assert max_date == "2025-02-25"

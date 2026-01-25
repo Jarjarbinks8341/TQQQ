@@ -45,7 +45,7 @@ class TestFormatSignalMessage:
         assert sample_signal["date"] in message
         assert f"${sample_signal['close_price']:.2f}" in message
         assert f"${sample_signal['ma5']:.2f}" in message
-        assert f"${sample_signal['ma20']:.2f}" in message
+        assert f"${sample_signal['ma30']:.2f}" in message
 
 
 class TestLogToConsole:

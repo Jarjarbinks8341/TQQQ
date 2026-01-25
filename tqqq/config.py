@@ -21,7 +21,7 @@ CRON_LOG_PATH = LOGS_DIR / "cron.log"
 
 # Moving average settings
 MA_SHORT = 5
-MA_LONG = 20
+MA_LONG = 30
 
 # Webhook (Slack/Discord)
 WEBHOOK_URL = os.environ.get("TQQQ_WEBHOOK_URL", "")

@@ -42,7 +42,7 @@ class TestConfig:
         from tqqq.config import MA_SHORT, MA_LONG
 
         assert MA_SHORT == 5
-        assert MA_LONG == 20
+        assert MA_LONG == 30
         assert MA_SHORT < MA_LONG
 
     def test_ticker_setting(self):

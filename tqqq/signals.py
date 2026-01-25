@@ -42,7 +42,7 @@ def detect_crossovers(conn: sqlite3.Connection) -> List[Dict]:
             "signal_type": "GOLDEN_CROSS",
             "close_price": row["close"],
             "ma5": row["MA_SHORT"],
-            "ma20": row["MA_LONG"]
+            "ma30": row["MA_LONG"]
         })
 
     # Dead Cross: Short MA crosses from above to below Long MA
@@ -53,7 +53,7 @@ def detect_crossovers(conn: sqlite3.Connection) -> List[Dict]:
             "signal_type": "DEAD_CROSS",
             "close_price": row["close"],
             "ma5": row["MA_SHORT"],
-            "ma20": row["MA_LONG"]
+            "ma30": row["MA_LONG"]
         })
 
     return signals

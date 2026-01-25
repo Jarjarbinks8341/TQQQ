@@ -39,7 +39,7 @@ def _create_tables(conn: sqlite3.Connection) -> None:
             signal_type TEXT NOT NULL,
             close_price REAL,
             ma5 REAL,
-            ma20 REAL,
+            ma30 REAL,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
             UNIQUE(date, signal_type)
         )
@@ -119,14 +119,14 @@ def save_signals(conn: sqlite3.Connection, signals: List[Dict]) -> int:
     for signal in signals:
         cursor.execute("""
             INSERT OR IGNORE INTO crossover_signals
-            (date, signal_type, close_price, ma5, ma20)
+            (date, signal_type, close_price, ma5, ma30)
             VALUES (?, ?, ?, ?, ?)
         """, (
             signal["date"],
             signal["signal_type"],
             signal["close_price"],
             signal["ma5"],
-            signal["ma20"]
+            signal["ma30"]
         ))
         saved += cursor.rowcount
 

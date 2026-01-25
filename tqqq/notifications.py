@@ -38,7 +38,7 @@ def format_signal_message(signal: Dict) -> tuple:
         f"Date: {signal['date']}\n"
         f"Close: ${signal['close_price']:.2f}\n"
         f"MA5: ${signal['ma5']:.2f}\n"
-        f"MA20: ${signal['ma20']:.2f}"
+        f"MA30: ${signal['ma30']:.2f}"
     )
 
     return emoji, signal_name, message
@@ -58,7 +58,7 @@ def log_to_file(signal: Dict, timestamp: str) -> None:
         f.write(
             f"  Close: ${signal['close_price']:.2f}, "
             f"MA5: ${signal['ma5']:.2f}, "
-            f"MA20: ${signal['ma20']:.2f}\n\n"
+            f"MA30: ${signal['ma30']:.2f}\n\n"
         )
 
 
