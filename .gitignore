@@ -1,0 +1,32 @@
+# Environment variables (contains secrets)
+.env
+
+# Data directory (database, charts)
+data/*.db
+data/*.png
+
+# Logs
+logs/*.log
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.pytest_cache/
+*.egg-info/
+
+# macOS
+.DS_Store
+
+# IDE
+.vscode/
+.idea/
+
+# Old files (to be removed)
+*.db
+*.log
+*.png
+fetch_tqqq_data.py
+plot_tqqq.py
+test_crossover.py
+run_tqqq.sh
