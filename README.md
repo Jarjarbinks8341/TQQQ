@@ -95,7 +95,7 @@ The crossover strategy slightly outperformed buy-and-hold over 6 years by avoidi
 
 | Script | Description | Options |
 |--------|-------------|---------|
-| `scripts/fetch_data.py` | Fetch data and detect signals | `--ticker TQQQ`, `--parallel`, `--full` |
+| `scripts/fetch_data.py` | Fetch data and detect signals | `--ticker TQQQ`, `--parallel`, `--full`, `--no-notify` |
 | `scripts/status.py` | Show current MA status | `--ticker TQQQ` |
 | `scripts/plot_chart.py` | Generate price/MA chart | `--ticker TQQQ` |
 | `scripts/simulate.py` | Run crossover simulation | `--ticker TQQQ`, `--start`, `--end` |
@@ -138,11 +138,28 @@ python scripts/fetch_data.py --ticker YINN
 # Parallel fetching for faster execution (multiple tickers)
 python scripts/fetch_data.py --parallel
 
+# Add a new ticker without sending historical notifications
+python scripts/fetch_data.py --ticker SPY --full --no-notify
+
 # View status for all tickers
 python scripts/status.py
 
 # View status for specific ticker
 python scripts/status.py --ticker TQQQ
+```
+
+**Adding a New Ticker**:
+When adding a new ticker for the first time, use the `--no-notify` flag to populate historical signal data without sending notifications for old crossovers:
+
+```bash
+# 1. Add ticker to .env
+echo "TQQQ_TICKERS=TQQQ,YINN,SPY" >> .env
+
+# 2. Fetch historical data without notifications
+python scripts/fetch_data.py --ticker SPY --full --no-notify
+
+# 3. Future runs will only notify on NEW signals
+python scripts/fetch_data.py --ticker SPY
 ```
 
 ## VM Deployment
