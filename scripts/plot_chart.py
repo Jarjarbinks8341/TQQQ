@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
-"""Plot TQQQ stock price with moving averages."""
+"""Plot stock price with moving averages."""
 
+import argparse
 import sys
 from pathlib import Path
 
@@ -10,17 +11,27 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 import matplotlib.pyplot as plt
 import pandas as pd
 
-from tqqq.config import ROOT_DIR, MA_SHORT, MA_LONG
+from tqqq.config import ROOT_DIR, MA_SHORT, MA_LONG, TICKER
 from tqqq.database import get_connection, load_prices
 
 
 def main():
+    parser = argparse.ArgumentParser(description="Plot stock chart with moving averages")
+    parser.add_argument(
+        "--ticker",
+        default=TICKER,
+        help=f"Ticker to plot (default: {TICKER})",
+    )
+    args = parser.parse_args()
+
+    ticker = args.ticker.upper()
+
     conn = get_connection()
-    df = load_prices(conn)
+    df = load_prices(conn, ticker)
     conn.close()
 
     if len(df) < MA_LONG:
-        print(f"Not enough data. Need at least {MA_LONG} days.")
+        print(f"Not enough data for {ticker}. Need at least {MA_LONG} days.")
         return
 
     # Calculate moving averages
@@ -34,7 +45,7 @@ def main():
     plt.plot(df.index, df["MA_SHORT"], label=f"{MA_SHORT}-Day MA", linewidth=2)
     plt.plot(df.index, df["MA_LONG"], label=f"{MA_LONG}-Day MA", linewidth=2)
 
-    plt.title("TQQQ Stock Price with Moving Averages", fontsize=14)
+    plt.title(f"{ticker} Stock Price with Moving Averages", fontsize=14)
     plt.xlabel("Date")
     plt.ylabel("Price ($)")
     plt.legend(loc="upper left")
@@ -42,7 +53,7 @@ def main():
     plt.tight_layout()
 
     # Save to file
-    output_path = ROOT_DIR / "data" / "tqqq_chart.png"
+    output_path = ROOT_DIR / "data" / f"{ticker.lower()}_chart.png"
     plt.savefig(output_path, dpi=150)
     print(f"Chart saved to {output_path}")
 

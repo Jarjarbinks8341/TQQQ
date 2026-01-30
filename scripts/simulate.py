@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 
 import pandas as pd
 
-from tqqq.config import MA_SHORT, MA_LONG
+from tqqq.config import MA_SHORT, MA_LONG, TICKER
 from tqqq.database import get_connection, load_prices
 
 
@@ -26,10 +26,17 @@ def main():
         default="2026-01-25",
         help="End date (YYYY-MM-DD)",
     )
+    parser.add_argument(
+        "--ticker",
+        default=TICKER,
+        help=f"Ticker to simulate (default: {TICKER})",
+    )
     args = parser.parse_args()
 
+    ticker = args.ticker.upper()
+
     conn = get_connection()
-    df = load_prices(conn)
+    df = load_prices(conn, ticker)
     conn.close()
 
     # Calculate moving averages
@@ -46,10 +53,10 @@ def main():
     data = df[mask].copy()
 
     print("=" * 80)
-    print(f"CROSSOVER SIMULATION: {args.start} to {args.end}")
+    print(f"{ticker} CROSSOVER SIMULATION: {args.start} to {args.end}")
     print("=" * 80)
 
-    print(f"\n{'Date':<12} {'Close':>8} {'MA5':>8} {'MA20':>8} {'Status':>12} {'Signal':>20}")
+    print(f"\n{'Date':<12} {'Close':>8} {'MA5':>8} {'MA30':>8} {'Status':>12} {'Signal':>20}")
     print("-" * 80)
 
     signals = []
@@ -85,10 +92,10 @@ def main():
 
     if len(data) > 0:
         last = data.iloc[-1]
-        status = "BULLISH (MA5 > MA20)" if last["short_above"] else "BEARISH (MA5 < MA20)"
+        status = "BULLISH (MA5 > MA30)" if last["short_above"] else "BEARISH (MA5 < MA30)"
         print(f"\nCurrent Status ({last['date'].strftime('%Y-%m-%d')}): {status}")
         print(f"  MA5:  ${last['MA_SHORT']:.2f}")
-        print(f"  MA20: ${last['MA_LONG']:.2f}")
+        print(f"  MA30: ${last['MA_LONG']:.2f}")
 
 
 if __name__ == "__main__":
