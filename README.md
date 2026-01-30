@@ -15,6 +15,38 @@ pip install -r requirements.txt
 python scripts/status.py
 ```
 
+## Automated Daily Execution (GitHub Actions)
+
+Run the trading bot automatically every day using GitHub Actions:
+
+1. **Set up GitHub Secrets** (one-time setup):
+   - Go to your repository → Settings → Secrets and variables → Actions
+   - Add these secrets:
+     - `TQQQ_EMAIL_ENABLED`: `true`
+     - `TQQQ_EMAIL_SENDER`: Your Gmail address
+     - `TQQQ_EMAIL_PASSWORD`: Gmail app password (see setup guide)
+     - `TQQQ_EMAIL_RECIPIENTS`: Recipient email address
+
+2. **Push the workflow** to GitHub:
+   ```bash
+   git add .github/
+   git commit -m "add GitHub Actions workflow for daily trading bot"
+   git push
+   ```
+
+3. **The bot will now run automatically**:
+   - Every weekday (Mon-Fri) at 9:00 AM ET (market open)
+   - Fetches latest prices for TQQQ and YINN
+   - Detects crossover signals
+   - Sends email notifications if signals detected
+
+4. **Monitor execution**:
+   - Go to Actions tab in your GitHub repository
+   - View workflow runs and logs
+   - Manually trigger runs for testing
+
+📖 **Detailed Setup Guide**: See [`.github/GITHUB_ACTIONS_SETUP.md`](.github/GITHUB_ACTIONS_SETUP.md)
+
 ## Running Tests
 
 ```bash
