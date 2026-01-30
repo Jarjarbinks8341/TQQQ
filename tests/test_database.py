@@ -15,6 +15,8 @@ from tqqq.database import (
     save_signals,
     get_price_count,
     get_date_range,
+    get_all_tickers,
+    get_ticker_stats,
 )
 
 
@@ -53,13 +55,13 @@ class TestGetLastDate:
     def test_returns_none_for_empty_db(self, temp_db):
         """Test returns None when database is empty."""
         conn, _ = temp_db
-        result = get_last_date(conn)
+        result = get_last_date(conn, "TQQQ")
         assert result is None
 
     def test_returns_max_date(self, populated_db):
         """Test returns the most recent date."""
         conn, _ = populated_db
-        result = get_last_date(conn)
+        result = get_last_date(conn, "TQQQ")
         assert result is not None
         # Should be the last business day in our 40-day sample
         assert result == "2025-02-25"
@@ -71,7 +73,7 @@ class TestSavePrices:
     def test_saves_prices(self, temp_db, sample_price_data):
         """Test that prices are saved correctly."""
         conn, _ = temp_db
-        rows = save_prices(conn, sample_price_data)
+        rows = save_prices(conn, "TQQQ", sample_price_data)
         assert rows == 40
 
     def test_updates_existing_prices(self, temp_db, sample_price_data):
@@ -79,25 +81,25 @@ class TestSavePrices:
         conn, _ = temp_db
 
         # Save initial data
-        save_prices(conn, sample_price_data)
+        save_prices(conn, "TQQQ", sample_price_data)
 
         # Modify and save again
         modified_data = sample_price_data.copy()
         modified_data["Close"] = modified_data["Close"] + 10
-        rows = save_prices(conn, modified_data)
+        rows = save_prices(conn, "TQQQ", modified_data)
 
         assert rows == 40
 
         # Verify data was updated
         cursor = conn.cursor()
-        cursor.execute("SELECT close FROM tqqq_prices WHERE date = '2025-01-01'")
+        cursor.execute("SELECT close FROM tqqq_prices WHERE ticker = 'TQQQ' AND date = '2025-01-01'")
         result = cursor.fetchone()[0]
         assert result == 60.0  # Original 50.0 + 10
 
     def test_returns_correct_count(self, temp_db, sample_price_data):
         """Test that correct row count is returned."""
         conn, _ = temp_db
-        rows = save_prices(conn, sample_price_data)
+        rows = save_prices(conn, "TQQQ", sample_price_data)
         assert rows == len(sample_price_data)
 
 
@@ -107,7 +109,7 @@ class TestLoadPrices:
     def test_loads_prices(self, populated_db):
         """Test that prices are loaded correctly."""
         conn, _ = populated_db
-        df = load_prices(conn)
+        df = load_prices(conn, "TQQQ")
 
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 40
@@ -117,14 +119,14 @@ class TestLoadPrices:
     def test_returns_empty_for_empty_db(self, temp_db):
         """Test returns empty DataFrame for empty database."""
         conn, _ = temp_db
-        df = load_prices(conn)
+        df = load_prices(conn, "TQQQ")
         assert isinstance(df, pd.DataFrame)
         assert len(df) == 0
 
     def test_ordered_by_date(self, populated_db):
         """Test that results are ordered by date."""
         conn, _ = populated_db
-        df = load_prices(conn)
+        df = load_prices(conn, "TQQQ")
 
         dates = df["date"].tolist()
         assert dates == sorted(dates)
@@ -137,7 +139,7 @@ class TestGetNewSignals:
         """Test all signals are new when database is empty."""
         conn, _ = temp_db
         signals = [sample_signal]
-        new_signals = get_new_signals(conn, signals)
+        new_signals = get_new_signals(conn, "TQQQ", signals)
         assert len(new_signals) == 1
 
     def test_filters_existing_signals(self, temp_db, sample_signal):
@@ -145,10 +147,10 @@ class TestGetNewSignals:
         conn, _ = temp_db
 
         # Save the signal first
-        save_signals(conn, [sample_signal])
+        save_signals(conn, "TQQQ", [sample_signal])
 
         # Try to get new signals
-        new_signals = get_new_signals(conn, [sample_signal])
+        new_signals = get_new_signals(conn, "TQQQ", [sample_signal])
         assert len(new_signals) == 0
 
     def test_returns_only_new_signals(self, temp_db, sample_signal, sample_dead_cross_signal):
@@ -156,11 +158,11 @@ class TestGetNewSignals:
         conn, _ = temp_db
 
         # Save one signal
-        save_signals(conn, [sample_signal])
+        save_signals(conn, "TQQQ", [sample_signal])
 
         # Check both signals
         signals = [sample_signal, sample_dead_cross_signal]
-        new_signals = get_new_signals(conn, signals)
+        new_signals = get_new_signals(conn, "TQQQ", signals)
 
         assert len(new_signals) == 1
         assert new_signals[0]["signal_type"] == "DEAD_CROSS"
@@ -172,15 +174,15 @@ class TestSaveSignals:
     def test_saves_signal(self, temp_db, sample_signal):
         """Test that signal is saved correctly."""
         conn, _ = temp_db
-        saved = save_signals(conn, [sample_signal])
+        saved = save_signals(conn, "TQQQ", [sample_signal])
         assert saved == 1
 
     def test_ignores_duplicates(self, temp_db, sample_signal):
         """Test that duplicate signals are ignored."""
         conn, _ = temp_db
 
-        save_signals(conn, [sample_signal])
-        saved = save_signals(conn, [sample_signal])
+        save_signals(conn, "TQQQ", [sample_signal])
+        saved = save_signals(conn, "TQQQ", [sample_signal])
 
         assert saved == 0
 
@@ -188,7 +190,7 @@ class TestSaveSignals:
         """Test saving multiple signals."""
         conn, _ = temp_db
         signals = [sample_signal, sample_dead_cross_signal]
-        saved = save_signals(conn, signals)
+        saved = save_signals(conn, "TQQQ", signals)
         assert saved == 2
 
 
@@ -198,13 +200,19 @@ class TestGetPriceCount:
     def test_returns_zero_for_empty_db(self, temp_db):
         """Test returns 0 for empty database."""
         conn, _ = temp_db
-        count = get_price_count(conn)
+        count = get_price_count(conn, "TQQQ")
         assert count == 0
 
     def test_returns_correct_count(self, populated_db):
         """Test returns correct count."""
         conn, _ = populated_db
-        count = get_price_count(conn)
+        count = get_price_count(conn, "TQQQ")
+        assert count == 40
+
+    def test_returns_total_count_without_ticker(self, populated_db):
+        """Test returns total count for all tickers when ticker is None."""
+        conn, _ = populated_db
+        count = get_price_count(conn, None)
         assert count == 40
 
 
@@ -214,13 +222,48 @@ class TestGetDateRange:
     def test_returns_none_for_empty_db(self, temp_db):
         """Test returns None for empty database."""
         conn, _ = temp_db
-        min_date, max_date = get_date_range(conn)
+        min_date, max_date = get_date_range(conn, "TQQQ")
         assert min_date is None
         assert max_date is None
 
     def test_returns_correct_range(self, populated_db):
         """Test returns correct date range."""
         conn, _ = populated_db
-        min_date, max_date = get_date_range(conn)
+        min_date, max_date = get_date_range(conn, "TQQQ")
         assert min_date == "2025-01-01"
         assert max_date == "2025-02-25"
+
+
+class TestGetAllTickers:
+    """Tests for get_all_tickers function."""
+
+    def test_returns_empty_for_empty_db(self, temp_db):
+        """Test returns empty list for empty database."""
+        conn, _ = temp_db
+        tickers = get_all_tickers(conn)
+        assert tickers == []
+
+    def test_returns_all_tickers(self, populated_db):
+        """Test returns all tickers in database."""
+        conn, _ = populated_db
+        tickers = get_all_tickers(conn)
+        assert tickers == ["TQQQ"]
+
+
+class TestGetTickerStats:
+    """Tests for get_ticker_stats function."""
+
+    def test_returns_empty_for_empty_db(self, temp_db):
+        """Test returns empty dict for empty database."""
+        conn, _ = temp_db
+        stats = get_ticker_stats(conn)
+        assert stats == {}
+
+    def test_returns_stats(self, populated_db):
+        """Test returns correct statistics."""
+        conn, _ = populated_db
+        stats = get_ticker_stats(conn)
+        assert "TQQQ" in stats
+        assert stats["TQQQ"]["record_count"] == 40
+        assert stats["TQQQ"]["first_date"] == "2025-01-01"
+        assert stats["TQQQ"]["last_date"] == "2025-02-25"

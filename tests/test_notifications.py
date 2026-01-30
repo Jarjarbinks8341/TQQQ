@@ -183,7 +183,7 @@ class TestSendEmail:
         with patch("tqqq.notifications.EMAIL_ENABLED", True):
             with patch("tqqq.notifications.EMAIL_SENDER", "sender@test.com"):
                 with patch("tqqq.notifications.EMAIL_PASSWORD", "password"):
-                    with patch("tqqq.notifications.EMAIL_RECIPIENT", "recipient@test.com"):
+                    with patch("tqqq.notifications.EMAIL_RECIPIENTS", ["recipient@test.com"]):
                         with patch("tqqq.notifications.smtplib.SMTP") as mock_smtp:
                             mock_server = MagicMock()
                             mock_smtp.return_value.__enter__.return_value = mock_server
@@ -200,7 +200,7 @@ class TestSendEmail:
         with patch("tqqq.notifications.EMAIL_ENABLED", True):
             with patch("tqqq.notifications.EMAIL_SENDER", "sender@test.com"):
                 with patch("tqqq.notifications.EMAIL_PASSWORD", "password"):
-                    with patch("tqqq.notifications.EMAIL_RECIPIENT", "recipient@test.com"):
+                    with patch("tqqq.notifications.EMAIL_RECIPIENTS", ["recipient@test.com"]):
                         with patch("tqqq.notifications.smtplib.SMTP") as mock_smtp:
                             mock_smtp.return_value.__enter__.side_effect = Exception("SMTP Error")
 

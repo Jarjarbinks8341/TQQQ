@@ -1,0 +1,10 @@
+# TQQQ Trading Bot - Daily Data Fetch and Signal Check
+# Runs at 6:00 PM ET (after market close) Monday-Friday
+# For UTC servers, adjust time accordingly (6 PM ET = 11 PM UTC in winter, 10 PM UTC in summer)
+
+SHELL=/bin/bash
+PATH=/opt/tqqq/venv/bin:/usr/bin:/bin
+TQQQ_HOME=/opt/tqqq
+
+# Run daily at 6:00 PM ET (23:00 UTC) on weekdays
+0 23 * * 1-5 tqqq cd /opt/tqqq && /opt/tqqq/venv/bin/python /opt/tqqq/scripts/fetch_data.py >> /var/log/tqqq/cron.log 2>&1

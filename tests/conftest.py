@@ -23,29 +23,32 @@ def temp_db():
     conn = sqlite3.connect(path)
     cursor = conn.cursor()
 
-    # Create tables
+    # Create tables with multi-ticker schema
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS tqqq_prices (
-            date TEXT PRIMARY KEY,
+            ticker TEXT NOT NULL,
+            date TEXT NOT NULL,
             open REAL,
             high REAL,
             low REAL,
             close REAL,
             adj_close REAL,
-            volume INTEGER
+            volume INTEGER,
+            PRIMARY KEY (ticker, date)
         )
     """)
 
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS crossover_signals (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ticker TEXT NOT NULL,
             date TEXT NOT NULL,
             signal_type TEXT NOT NULL,
             close_price REAL,
             ma5 REAL,
             ma30 REAL,
             created_at TEXT DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(date, signal_type)
+            UNIQUE(ticker, date, signal_type)
         )
     """)
 
@@ -108,17 +111,18 @@ def sample_price_data_with_crossover():
 
 @pytest.fixture
 def populated_db(temp_db, sample_price_data):
-    """Create a database populated with sample data."""
+    """Create a database populated with sample data for TQQQ."""
     conn, path = temp_db
     cursor = conn.cursor()
 
     for date, row in sample_price_data.iterrows():
         cursor.execute(
             """
-            INSERT INTO tqqq_prices (date, open, high, low, close, adj_close, volume)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO tqqq_prices (ticker, date, open, high, low, close, adj_close, volume)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
         """,
             (
+                "TQQQ",
                 date.strftime("%Y-%m-%d"),
                 row["Open"],
                 row["High"],
@@ -137,6 +141,7 @@ def populated_db(temp_db, sample_price_data):
 def sample_signal():
     """Create a sample crossover signal."""
     return {
+        "ticker": "TQQQ",
         "date": "2025-01-15",
         "signal_type": "GOLDEN_CROSS",
         "close_price": 55.50,
@@ -149,6 +154,7 @@ def sample_signal():
 def sample_dead_cross_signal():
     """Create a sample dead cross signal."""
     return {
+        "ticker": "TQQQ",
         "date": "2025-01-20",
         "signal_type": "DEAD_CROSS",
         "close_price": 48.00,

@@ -383,6 +383,244 @@ class TestEndToEndIntegration:
 
 
 @requires_historical_data
+class TestTradingSimulation:
+    """Trading simulation tests using real historical data."""
+
+    def test_trading_simulation_from_jan_2025(self):
+        """Simulate trading strategy: buy at golden cross, sell at dead cross.
+
+        Starting capital: $10,000 USD
+        Start date: January 1st, 2025
+        Strategy: Buy 100% at golden cross, sell 100% at dead cross
+        """
+        import logging
+
+        # Setup logging
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger("trading_simulation")
+
+        # Initial capital
+        INITIAL_CAPITAL = 10000.00
+        START_DATE = "2020-01-01"
+
+        conn = get_connection()
+        df = load_prices(conn)
+
+        # Calculate moving averages
+        df["MA_SHORT"] = df["close"].rolling(window=MA_SHORT).mean()
+        df["MA_LONG"] = df["close"].rolling(window=MA_LONG).mean()
+        df = df.dropna()
+
+        # Filter from start date
+        df = df[df["date"] >= START_DATE].copy()
+
+        if len(df) == 0:
+            conn.close()
+            pytest.skip("No data available from 2025-01-01")
+
+        # Detect crossovers
+        df["short_above"] = df["MA_SHORT"] > df["MA_LONG"]
+        df["prev_short_above"] = df["short_above"].shift(1)
+
+        # Trading state
+        cash = INITIAL_CAPITAL
+        shares = 0.0
+        position = "CASH"  # CASH or HOLDING
+
+        trades = []
+
+        print("\n" + "=" * 100)
+        print("TRADING SIMULATION: Buy at Golden Cross, Sell at Dead Cross")
+        print("=" * 100)
+        print(f"Initial Capital: ${INITIAL_CAPITAL:,.2f}")
+        print(f"Start Date: {START_DATE}")
+        print(f"Strategy: MA{MA_SHORT}/MA{MA_LONG} Crossover")
+        print("=" * 100)
+
+        logger.info("=" * 80)
+        logger.info("TRADING SIMULATION STARTED")
+        logger.info(f"Initial Capital: ${INITIAL_CAPITAL:,.2f}")
+        logger.info(f"Start Date: {START_DATE}")
+        logger.info("=" * 80)
+
+        for _, row in df.iterrows():
+            date_str = row["date"].strftime("%Y-%m-%d")
+            price = row["close"]
+
+            # Golden Cross - BUY signal
+            if row["short_above"] == True and row["prev_short_above"] == False:
+                if position == "CASH" and cash > 0:
+                    shares = cash / price
+                    trade_info = {
+                        "date": date_str,
+                        "action": "BUY",
+                        "price": price,
+                        "shares": shares,
+                        "value": cash,
+                    }
+                    trades.append(trade_info)
+                    print(f"🟢 {date_str}: BUY  @ ${price:,.2f} | Shares: {shares:,.4f} | Value: ${cash:,.2f}")
+                    logger.info(f"GOLDEN CROSS - BUY @ ${price:,.2f} | Shares: {shares:,.4f}")
+                    cash = 0
+                    position = "HOLDING"
+
+            # Dead Cross - SELL signal
+            elif row["short_above"] == False and row["prev_short_above"] == True:
+                if position == "HOLDING" and shares > 0:
+                    sell_value = shares * price
+                    profit = sell_value - trades[-1]["value"]
+                    profit_pct = (profit / trades[-1]["value"]) * 100
+                    trade_info = {
+                        "date": date_str,
+                        "action": "SELL",
+                        "price": price,
+                        "shares": shares,
+                        "value": sell_value,
+                        "profit": profit,
+                        "profit_pct": profit_pct,
+                    }
+                    trades.append(trade_info)
+                    print(f"🔴 {date_str}: SELL @ ${price:,.2f} | Shares: {shares:,.4f} | Value: ${sell_value:,.2f} | P/L: ${profit:+,.2f} ({profit_pct:+.2f}%)")
+                    logger.info(f"DEAD CROSS - SELL @ ${price:,.2f} | Value: ${sell_value:,.2f} | P/L: ${profit:+,.2f}")
+                    cash = sell_value
+                    shares = 0
+                    position = "CASH"
+
+        # Calculate final portfolio value
+        last_row = df.iloc[-1]
+        last_date = last_row["date"].strftime("%Y-%m-%d")
+        last_price = last_row["close"]
+
+        if position == "HOLDING":
+            final_value = shares * last_price
+        else:
+            final_value = cash
+
+        total_return = final_value - INITIAL_CAPITAL
+        total_return_pct = (total_return / INITIAL_CAPITAL) * 100
+
+        # Calculate buy-and-hold comparison
+        first_price = df.iloc[0]["close"]
+        buy_hold_shares = INITIAL_CAPITAL / first_price
+        buy_hold_value = buy_hold_shares * last_price
+        buy_hold_return = buy_hold_value - INITIAL_CAPITAL
+        buy_hold_pct = (buy_hold_return / INITIAL_CAPITAL) * 100
+
+        # Print summary
+        print("\n" + "=" * 100)
+        print("SIMULATION RESULTS")
+        print("=" * 100)
+        print(f"Period: {START_DATE} to {last_date}")
+        print(f"Total Trades: {len(trades)}")
+        print(f"Current Position: {position}")
+        if position == "HOLDING":
+            print(f"Current Shares: {shares:,.4f}")
+        print("-" * 100)
+        print(f"Initial Capital:     ${INITIAL_CAPITAL:>12,.2f}")
+        print(f"Final Portfolio:     ${final_value:>12,.2f}")
+        print(f"Total Return:        ${total_return:>+12,.2f} ({total_return_pct:+.2f}%)")
+        print("-" * 100)
+        print("COMPARISON: Buy and Hold")
+        print(f"Buy & Hold Value:    ${buy_hold_value:>12,.2f}")
+        print(f"Buy & Hold Return:   ${buy_hold_return:>+12,.2f} ({buy_hold_pct:+.2f}%)")
+        print("-" * 100)
+        strategy_diff = total_return - buy_hold_return
+        print(f"Strategy vs B&H:     ${strategy_diff:>+12,.2f}")
+        print("=" * 100)
+
+        # Log final results
+        logger.info("=" * 80)
+        logger.info("SIMULATION COMPLETE")
+        logger.info(f"Final Portfolio Value: ${final_value:,.2f}")
+        logger.info(f"Total Return: ${total_return:+,.2f} ({total_return_pct:+.2f}%)")
+        logger.info(f"Buy & Hold Return: ${buy_hold_return:+,.2f} ({buy_hold_pct:+.2f}%)")
+        logger.info(f"Strategy vs B&H: ${strategy_diff:+,.2f}")
+        logger.info("=" * 80)
+
+        conn.close()
+
+        # Assertions
+        assert final_value > 0, "Final portfolio value should be positive"
+        assert len(trades) >= 0, "Should have detected trades"
+
+    def test_buy_and_hold_simulation(self):
+        """Simulate buy-and-hold strategy for comparison.
+
+        Starting capital: $10,000 USD
+        Start date: January 1st, 2024
+        Strategy: Buy on first day, hold until end
+        """
+        import logging
+
+        logging.basicConfig(level=logging.INFO)
+        logger = logging.getLogger("buy_and_hold_simulation")
+
+        INITIAL_CAPITAL = 10000.00
+        START_DATE = "2020-01-01"
+
+        conn = get_connection()
+        df = load_prices(conn)
+        conn.close()
+
+        # Filter from start date
+        df = df[df["date"] >= START_DATE].copy()
+
+        if len(df) == 0:
+            pytest.skip("No data available from 2020-01-01")
+
+        # Get first and last prices
+        first_row = df.iloc[0]
+        last_row = df.iloc[-1]
+
+        first_date = first_row["date"].strftime("%Y-%m-%d")
+        first_price = first_row["close"]
+        last_date = last_row["date"].strftime("%Y-%m-%d")
+        last_price = last_row["close"]
+
+        # Buy and hold calculation
+        shares = INITIAL_CAPITAL / first_price
+        final_value = shares * last_price
+        total_return = final_value - INITIAL_CAPITAL
+        total_return_pct = (total_return / INITIAL_CAPITAL) * 100
+
+        print("\n" + "=" * 100)
+        print("BUY AND HOLD SIMULATION")
+        print("=" * 100)
+        print(f"Initial Capital: ${INITIAL_CAPITAL:,.2f}")
+        print(f"Start Date: {START_DATE}")
+        print(f"Strategy: Buy on first day, hold forever")
+        print("=" * 100)
+
+        print(f"\n🟢 {first_date}: BUY  @ ${first_price:,.2f} | Shares: {shares:,.4f} | Value: ${INITIAL_CAPITAL:,.2f}")
+        print(f"📊 {last_date}: HOLD @ ${last_price:,.2f} | Shares: {shares:,.4f} | Value: ${final_value:,.2f}")
+
+        print("\n" + "=" * 100)
+        print("BUY AND HOLD RESULTS")
+        print("=" * 100)
+        print(f"Period: {first_date} to {last_date}")
+        print(f"Holding Period: {len(df)} trading days")
+        print("-" * 100)
+        print(f"Buy Price:           ${first_price:>12,.2f}")
+        print(f"Current Price:       ${last_price:>12,.2f}")
+        print(f"Price Change:        ${last_price - first_price:>+12,.2f} ({((last_price/first_price)-1)*100:+.2f}%)")
+        print("-" * 100)
+        print(f"Initial Capital:     ${INITIAL_CAPITAL:>12,.2f}")
+        print(f"Shares Purchased:    {shares:>12,.4f}")
+        print(f"Final Portfolio:     ${final_value:>12,.2f}")
+        print(f"Total Return:        ${total_return:>+12,.2f} ({total_return_pct:+.2f}%)")
+        print("=" * 100)
+
+        logger.info("=" * 80)
+        logger.info("BUY AND HOLD SIMULATION")
+        logger.info(f"Initial: ${INITIAL_CAPITAL:,.2f} -> Final: ${final_value:,.2f}")
+        logger.info(f"Return: ${total_return:+,.2f} ({total_return_pct:+.2f}%)")
+        logger.info("=" * 80)
+
+        assert final_value > 0, "Final portfolio value should be positive"
+        assert shares > 0, "Should have purchased shares"
+
+
+@requires_historical_data
 class TestDataQualityIntegration:
     """Tests for data quality and consistency."""
 

@@ -1,0 +1,80 @@
+================================================================================
+YINN INTEGRATION TEST & ANALYSIS (2020-01-01 to Present)
+================================================================================
+
+1. DATA QUALITY TESTS
+--------------------------------------------------------------------------------
+✓ Total records: 1528
+✓ Date range: 2020-01-02 to 2026-01-30
+✓ DataFrame loaded: 1528 rows
+✓ No duplicate dates: 0 duplicates found
+✓ Dates are sorted: True
+✓ All prices positive: 0 negative prices
+✓ Price range: $13.58 to $585.91
+  Mean: $128.79, Median: $48.34
+
+2. SIGNAL DETECTION TESTS
+--------------------------------------------------------------------------------
+✓ Total signals detected: 71
+✓ All signals have required fields: ticker, date, signal_type, close_price, ma5, ma30
+✓ Golden Crosses: 36
+✓ Dead Crosses: 35
+✓ Golden Cross signals validated (MA5 >= MA30)
+✓ Dead Cross signals validated (MA5 <= MA30)
+✓ Signals can be sorted chronologically
+
+3. CURRENT STATUS TESTS
+--------------------------------------------------------------------------------
+✓ Current status retrieved: BULLISH
+✓ Status has all required fields
+✓ BULLISH status consistent (MA5 $47.81 > MA30 $45.85)
+✓ Gap calculation correct: $1.95
+
+4. TRADING PERFORMANCE ANALYSIS
+--------------------------------------------------------------------------------
+✓ Initial Capital: $10,000.00
+✓ Final Value: $5,258.66
+✓ Total Return: -47.41%
+✓ Number of Trades: 72
+✓ Buy & Hold Return: -79.41%
+✓ Strategy vs Buy&Hold: +32.00%
+
+5. YEARLY SIGNAL BREAKDOWN
+--------------------------------------------------------------------------------
+  2020: 5 Golden Cross, 5 Dead Cross
+  2021: 7 Golden Cross, 7 Dead Cross
+  2022: 4 Golden Cross, 3 Dead Cross
+  2023: 6 Golden Cross, 7 Dead Cross
+  2024: 8 Golden Cross, 7 Dead Cross
+  2025: 5 Golden Cross, 6 Dead Cross
+  2026: 1 Golden Cross, 0 Dead Cross
+
+6. RECENT SIGNALS (Last 10)
+--------------------------------------------------------------------------------
+  🟢 2026-01-02: Golden Cross @ $47.72
+  🔴 2025-11-18: Dead Cross @ $46.22
+  🟢 2025-11-12: Golden Cross @ $51.42
+  🔴 2025-10-31: Dead Cross @ $47.39
+  🟢 2025-10-29: Golden Cross @ $52.10
+  🔴 2025-10-10: Dead Cross @ $43.31
+  🟢 2025-08-08: Golden Cross @ $43.00
+  🔴 2025-08-05: Dead Cross @ $43.02
+  🟢 2025-05-06: Golden Cross @ $35.90
+  🔴 2025-03-27: Dead Cross @ $44.33
+
+================================================================================
+INTEGRATION TEST SUMMARY
+================================================================================
+✅ All tests passed!
+   - Data quality: ✓
+   - Signal detection: ✓
+   - Current status: ✓
+   - Trading simulation: ✓
+
+YINN (2020-01-02 to 2026-01-30):
+   Records: 1528
+   Signals: 71 total (36 golden, 35 dead)
+   Status: BULLISH @ $46.12
+   Strategy Return: -47.41%
+   Buy & Hold Return: -79.41%
+================================================================================

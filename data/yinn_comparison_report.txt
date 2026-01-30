@@ -1,0 +1,78 @@
+================================================================================
+YINN TRADING STRATEGY COMPARISON: FULL PERIOD VS RECENT PERIOD
+================================================================================
+
+                        FULL PERIOD (2020-2026)  |  RECENT PERIOD (Oct 2022-2026)
+--------------------------------------------------------------------------------
+Time Span               6.0 years                |  3.2 years
+Trading Days            1,528 days               |  815 days
+Price Range             $13.58 - $585.91         |  $13.58 - $68.39
+--------------------------------------------------------------------------------
+Total Signals           71 signals               |  41 signals
+  - Golden Crosses      36 signals               |  21 signals
+  - Dead Crosses        35 signals               |  20 signals
+Signal Frequency        11.8 signals/year        |  12.8 signals/year
+--------------------------------------------------------------------------------
+Initial Capital         $10,000.00               |  $10,000.00
+Final Value             $5,258.66                |  $9,724.79
+Strategy Return         -47.41%                  |  -2.75%
+Number of Trades        72 trades                |  42 trades
+--------------------------------------------------------------------------------
+Buy & Hold Return       -79.41%                  |  +24.00%
+Strategy vs Buy&Hold    +32.00% (BETTER)         |  -26.75% (WORSE)
+================================================================================
+
+KEY INSIGHTS
+================================================================================
+
+1. FULL PERIOD (2020-2026): STRATEGY SAVED $3,200
+   - YINN crashed from $585.91 to $13.58 (97.7% decline)
+   - MA Crossover limited losses to -47.41%
+   - Buy & Hold lost -79.41%
+   - Strategy's defensive positioning protected capital during severe bear market
+
+2. RECENT PERIOD (Oct 2022-2026): STRATEGY LOST $2,675 TO WHIPSAW
+   - YINN recovered from $13.58 to $46.12 (+240% from bottom)
+   - MA Crossover returned -2.75% due to 41 false signals
+   - Buy & Hold gained +24.00%
+   - Choppy recovery market with frequent crossovers created whipsaw effect
+
+3. MARKET CONTEXT
+   - 2020-2022: Severe bear market in Chinese leveraged ETFs
+   - Oct 2022-2026: Volatile recovery with multiple failed rallies
+   - Signal frequency similar (11.8 vs 12.8/year) but outcomes vastly different
+
+4. STRATEGIC IMPLICATIONS
+   ✓ MA Crossover excels as DEFENSIVE tool in severe downtrends
+   ✗ MA Crossover struggles in choppy, range-bound recovery markets
+   ✓ Strategy's value is CAPITAL PRESERVATION, not growth
+   ⚠ High signal frequency (12-13/year) indicates volatile, whipsaw-prone conditions
+
+5. WHEN TO USE THIS STRATEGY
+   - Strong bearish trends: Excellent (saved 32% vs buy&hold)
+   - Recovery periods: Poor (lost 26.75% vs buy&hold)
+   - Best for: Risk-averse investors prioritizing capital preservation
+   - Not ideal for: Growth-seeking investors in recovery markets
+
+================================================================================
+CONCLUSION
+================================================================================
+
+The MA5/MA30 crossover strategy is a DEFENSIVE tool, not a growth strategy.
+
+Over the full 6-year period, it successfully limited catastrophic losses during
+YINN's 97.7% crash, outperforming buy-and-hold by 32 percentage points.
+
+However, in the recent 3.2-year recovery period, the strategy underperformed by
+26.75 percentage points due to whipsaw from 41 signals in choppy conditions.
+
+The strategy's true value lies in CAPITAL PRESERVATION during severe bear
+markets, not in capturing gains during volatile recoveries.
+
+For YINN (3x leveraged Chinese ETF), this defensive approach proved valuable
+over the full period, saving $3,200 on a $10,000 investment compared to
+buy-and-hold, despite underperforming in the recent recovery phase.
+
+================================================================================
+GENERATED: 2026-01-31
+================================================================================
