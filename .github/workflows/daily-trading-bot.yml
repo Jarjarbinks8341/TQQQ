@@ -1,0 +1,69 @@
+name: Daily Trading Bot
+
+on:
+  schedule:
+    # Run at 9:00 AM ET (14:00 UTC) on weekdays (Mon-Fri)
+    # Right at market open to check for overnight signals
+    - cron: '0 14 * * 1-5'
+
+  workflow_dispatch:  # Allow manual trigger for testing
+
+jobs:
+  fetch-and-analyze:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      - name: Install dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name: Download database from previous run
+        uses: actions/download-artifact@v4
+        with:
+          name: trading-database
+          path: data/
+        continue-on-error: true  # First run won't have artifact
+
+      - name: Fetch prices and detect crossovers
+        env:
+          TQQQ_TICKERS: TQQQ,YINN
+          TQQQ_EMAIL_ENABLED: ${{ secrets.TQQQ_EMAIL_ENABLED }}
+          TQQQ_EMAIL_SENDER: ${{ secrets.TQQQ_EMAIL_SENDER }}
+          TQQQ_EMAIL_PASSWORD: ${{ secrets.TQQQ_EMAIL_PASSWORD }}
+          TQQQ_EMAIL_RECIPIENTS: ${{ secrets.TQQQ_EMAIL_RECIPIENTS }}
+          TZ: America/New_York
+        run: |
+          echo "Running trading bot for TQQQ and YINN..."
+          python scripts/fetch_data.py
+
+      - name: Save database for next run
+        uses: actions/upload-artifact@v4
+        with:
+          name: trading-database
+          path: data/trading_data.db
+          retention-days: 90
+
+      - name: Display status
+        if: always()
+        run: |
+          echo "Current status:"
+          python scripts/status.py
+
+      - name: Upload logs
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ github.run_number }}
+          path: logs/
+          retention-days: 30
