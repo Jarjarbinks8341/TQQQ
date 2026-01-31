@@ -41,6 +41,11 @@ def main():
         action="store_true",
         help="Fetch multiple tickers in parallel (faster)",
     )
+    parser.add_argument(
+        "--no-notify",
+        action="store_true",
+        help="Skip notifications (useful when initializing new ticker history)",
+    )
     args = parser.parse_args()
 
     timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
@@ -116,8 +121,12 @@ def main():
         if new_signals:
             print(f"[{timestamp}] Found {len(new_signals)} new crossover signal(s)!")
             save_signals(conn, ticker, new_signals)
-            for signal in new_signals:
-                trigger_all_notifications(signal, timestamp)
+
+            if args.no_notify:
+                print(f"[{timestamp}] Skipping notifications (--no-notify flag set)")
+            else:
+                for signal in new_signals:
+                    trigger_all_notifications(signal, timestamp)
         else:
             print(f"[{timestamp}] No new crossover signals")
 
