@@ -170,8 +170,8 @@ Deploy as a service on a Linux VM with daily cron job and webhook API.
 
 ```bash
 # Clone repository
-git clone https://github.com/yourusername/tqqq.git
-cd tqqq
+git clone https://github.com/Jarjarbinks8341/crossover-trading.git
+cd crossover-trading
 
 # Run installer (requires root)
 sudo ./deploy/install.sh
