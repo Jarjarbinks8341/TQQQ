@@ -238,7 +238,7 @@ Then you can confidently:
 
 After setting up GitHub Secrets, test the workflow:
 
-1. Go to: https://github.com/Jarjarbinks8341/TQQQ/actions
+1. Go to: https://github.com/Jarjarbinks8341/crossover-trading/actions
 2. Click "Daily Trading Bot"
 3. Click "Run workflow" → "Run workflow"
 4. Wait 2-3 minutes
